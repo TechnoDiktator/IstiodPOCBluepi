@@ -5,14 +5,14 @@ FROM golang:1.19-alpine
 WORKDIR /app
 
 # Copy go.mod and go.sum, then download dependencies
-COPY go.mod go.sum ../
+COPY ../go.mod ../go.sum ./
 RUN go mod download
 
 # Copy the source code
-COPY ../ .
+COPY . .
 
-# Build the application
-RUN go build -o service-a
+# Build Service A from the cmd/serviceA directory
+RUN go build -o service-a ./cmd/serviceA
 
 # Expose the service port
 EXPOSE 8082
