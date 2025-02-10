@@ -42,3 +42,8 @@ func (m *MySQLDB) GetProducts() ([]models.Product, error) {
 	}
 	return products, nil
 }
+
+func (m *MySQLDB) CreateProduct(p models.Product) error {
+	_, err := m.Conn.Exec("INSERT INTO products (name, price) VALUES (?, ?)", p.Name, p.Price)
+	return err
+}
