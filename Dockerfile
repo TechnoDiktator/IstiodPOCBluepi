@@ -11,11 +11,11 @@ RUN go mod download
 # Copy the source code
 COPY . .
 
-# Build Service B from the cmd/serviceB directory
-RUN go build -o service-b ./cmd/serviceB
+# Build Service A from the cmd/serviceA directory
+RUN go build -o service-a ./cmd/serviceA
 
 # Expose the service port
-EXPOSE 8081
+EXPOSE 8082
 
 # Command to run the executable
-CMD ["/app/service-b"]
+CMD ["/app/service-a"]
