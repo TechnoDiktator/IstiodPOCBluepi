@@ -8,20 +8,21 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yourusername/IstiodPOCBluepi/models"
 )
 
 type ServiceA struct {
 	ServiceBURL string
 }
 
-func (s *ServiceA) FetchProducts() ([]ProductWithMetadata, error) {
+func (s *ServiceA) FetchProducts() ([]models.ProductWithMetadata, error) {
 	resp, err := http.Get(s.ServiceBURL + "/products")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch products: %v", err)
 	}
 	defer resp.Body.Close()
 
-	var products []ProductWithMetadata
+	var products []models.ProductWithMetadata
 	if err := json.NewDecoder(resp.Body).Decode(&products); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %v", err)
 	}
@@ -34,7 +35,7 @@ func (s *ServiceA) FetchProducts() ([]ProductWithMetadata, error) {
 	return products, nil
 }
 
-func (s *ServiceA) CreateProduct(p Product) (*ProductWithMetadata, error) {
+func (s *ServiceA) CreateProduct(p models.Product) (*models.ProductWithMetadata, error) {
 	jsonData, err := json.Marshal(p)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal product data: %v", err)
@@ -46,7 +47,7 @@ func (s *ServiceA) CreateProduct(p Product) (*ProductWithMetadata, error) {
 	}
 	defer resp.Body.Close()
 
-	var createdProduct ProductWithMetadata
+	var createdProduct models.ProductWithMetadata
 	if err := json.NewDecoder(resp.Body).Decode(&createdProduct); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %v", err)
 	}
@@ -71,7 +72,7 @@ func main() {
 	})
 
 	r.POST("/products", func(c *gin.Context) {
-		var p Product
+		var p models.Product
 		if err := c.ShouldBindJSON(&p); err != nil {
 			c.JSON(400, gin.H{"error": "Invalid input"})
 			return

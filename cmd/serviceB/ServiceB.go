@@ -1,22 +1,18 @@
-package serviceb
-
+package main
 
 import (
 	"database/sql"
-	"encoding/json"
+
 	"fmt"
 	"log"
-	"net/http"
 
-	"github.com/yourusername/IstiodPOCBluepi"
+	"github.com/yourusername/IstiodPOCBluepi/models"
+	//"github.com/yourusername/IstiodPOCBluepi/db/productcrud"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-
-
+	"github.com/yourusername/IstiodPOCBluepi/serviceinit"
 )
-
-
-
 
 var db *sql.DB
 
@@ -33,32 +29,38 @@ func connectDB() {
 	fmt.Println("Connected to MySQL successfully!")
 }
 
-func getProducts(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT id, name, price FROM products")
+func main() {
+	dsn := "root:password@tcp(localhost:3306)/testdb"
+	service, err := serviceinit.NewService(dsn)
 	if err != nil {
-		http.Error(w, "Failed to fetch products", http.StatusInternalServerError)
-		return
+		log.Fatalf("Failed to initialize services: %v", err)
 	}
-	defer rows.Close()
 
-	var products []Product
-	for rows.Next() {
-		var p Product
-		if err := rows.Scan(&p.ID, &p.Name, &p.Price); err != nil {
-			http.Error(w, "Failed to parse products", http.StatusInternalServerError)
+	r := gin.Default()
+	r.GET("/products", func(c *gin.Context) {
+		products, err := service.DBService.GetProducts()
+		if err != nil {
+			c.JSON(500, gin.H{"error": "Failed to fetch products"})
 			return
 		}
-		products = append(products, p)
-	}
+		c.JSON(200, products)
+	})
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(products)
-}
+	r.POST("/products", func(c *gin.Context) {
+		var p models.Product
+		if err := c.ShouldBindJSON(&p); err != nil {
+			c.JSON(400, gin.H{"error": "Invalid input"})
+			return
+		}
 
-func main() {
-	connectDB()
-	http.HandleFunc("/products", getProducts)
+		if err := service.DBService.CreateProduct(p); err != nil {
+			c.JSON(500, gin.H{"error": "Failed to create product"})
+			return
+		}
+
+		c.JSON(201, gin.H{"message": "Product created successfully"})
+	})
+
 	fmt.Println("Service B is running on port 8081")
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	r.Run(":8081")
 }
-
