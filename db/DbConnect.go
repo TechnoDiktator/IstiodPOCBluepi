@@ -5,9 +5,11 @@ import (
 	"fmt"
 )
 
-func connectDB() (*sql.DB, error) {
+type MySQLDB struct {
+	Conn *sql.DB
+}
 
-	dsn := "root:password@tcp(localhost:3306)/testdb"
+func NewMySQLDB(dsn string) (*MySQLDB, error) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to database: %v", err)
@@ -16,5 +18,5 @@ func connectDB() (*sql.DB, error) {
 		return nil, fmt.Errorf("database is unreachable: %v", err)
 	}
 	fmt.Println("Connected to MySQL successfully!")
-	return db, nil
+	return &MySQLDB{Conn: db}, nil
 }
