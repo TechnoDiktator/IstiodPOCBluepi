@@ -15,6 +15,7 @@ type MySQLDB struct {
 
 func NewMySQLDB(dsn string) (*MySQLDB, error) {
 	db, err := sql.Open("mysql", dsn)
+
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to database: %v", err)
 	}
