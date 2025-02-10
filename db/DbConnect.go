@@ -3,6 +3,10 @@ package db
 import (
 	"database/sql"
 	"fmt"
+
+	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/yourusername/IstiodPOCBluepi/models"
 )
 
 type MySQLDB struct {
@@ -19,4 +23,22 @@ func NewMySQLDB(dsn string) (*MySQLDB, error) {
 	}
 	fmt.Println("Connected to MySQL successfully!")
 	return &MySQLDB{Conn: db}, nil
+}
+
+func (m *MySQLDB) GetProducts() ([]models.Product, error) {
+	rows, err := m.Conn.Query("SELECT id, name, price FROM products")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var products []models.Product
+	for rows.Next() {
+		var p models.Product
+		if err := rows.Scan(&p.ID, &p.Name, &p.Price); err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+	return products, nil
 }
