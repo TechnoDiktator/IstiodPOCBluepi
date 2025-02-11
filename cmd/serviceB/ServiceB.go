@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 
 	"fmt"
 	"log"
@@ -14,20 +13,7 @@ import (
 	"github.com/yourusername/IstiodPOCBluepi/serviceinit"
 )
 
-var db *sql.DB
 
-func connectDB() {
-	var err error
-	dsn := "root:PlusOne98@17@tcp(127.0.0.1:3306)/testdb"
-	db, err = sql.Open("mysql", dsn)
-	if err != nil {
-		log.Fatalf("Error connecting to database: %v", err)
-	}
-	if err = db.Ping(); err != nil {
-		log.Fatalf("Database is unreachable: %v", err)
-	}
-	fmt.Println("Connected to MySQL successfully!")
-}
 
 func main() {
 	dsn := "root:PlusOne98@17@tcp(127.0.0.1:3306)/testdb"
