@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	fmt.Printf("Connecting To Db")
+	fmt.Printf("Connecting To Db ================== starting service b")
 	dsn := "root:PlusOne98@17@tcp(127.0.0.1:3306)/product_db"
 	service, err := serviceinit.NewService(dsn)
 	if err != nil {

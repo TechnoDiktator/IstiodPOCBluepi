@@ -61,7 +61,8 @@ func (s *ServiceA) CreateProduct(p models.Product) (*models.ProductWithMetadata,
 
 func main() {
 	r := gin.Default()
-	svcA := &ServiceA{ServiceBURL: "http://localhost:8081"}
+	svcA := &ServiceA{ServiceBURL: "http://service-b.default.svc.cluster.local:8081"}
+
 
 	r.GET("/products", func(c *gin.Context) {
 		products, err := svcA.FetchProducts()
