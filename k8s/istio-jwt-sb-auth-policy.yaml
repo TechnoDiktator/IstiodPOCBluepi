@@ -1,7 +1,8 @@
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: service-b-rbac
+  name: service-b-policy
+  namespace: default
 spec:
   selector:
     matchLabels:
@@ -9,7 +10,7 @@ spec:
   rules:
   - from:
     - source:
-        requestPrincipals: ["https://dev-s8pk7mul3yw2xy77.us.auth0.com/service-a"]
+        principals: ["cluster.local/ns/default/sa/service-a"]
     to:
     - operation:
         methods: ["GET", "POST"]

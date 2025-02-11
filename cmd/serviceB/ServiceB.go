@@ -1,15 +1,20 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"strings"
+
+	"net/http"
 
 	"github.com/yourusername/IstiodPOCBluepi/models"
-	//"github.com/yourusername/IstiodPOCBluepi/db/productcrud"
 
+	//"github.com/yourusername/IstiodPOCBluepi/db/productcrud"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/yourusername/IstiodPOCBluepi/serviceinit"
 )
 
@@ -22,7 +27,6 @@ func NewServiceB() *ServiceB {
 		Auth0Domain: os.Getenv("AUTH0_DOMAIN"), // Set this in environment variables
 	}
 }
-
 
 // Validate JWT Token using Auth0 JWKS
 func (s *ServiceB) ValidateJWT(tokenString string) (*jwt.Token, error) {
@@ -62,7 +66,6 @@ func (s *ServiceB) ValidateJWT(tokenString string) (*jwt.Token, error) {
 	}
 	return token, nil
 }
-
 
 func main() {
 	fmt.Printf("Connecting To Db ================== starting service b")
