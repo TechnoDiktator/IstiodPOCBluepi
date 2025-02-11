@@ -18,7 +18,7 @@ var db *sql.DB
 
 func connectDB() {
 	var err error
-	dsn := "root:password@tcp(localhost:3306)/testdb"
+	dsn := "root:PlusOne98@17@tcp(127.0.0.1:3306)/testdb"
 	db, err = sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatalf("Error connecting to database: %v", err)
@@ -30,7 +30,7 @@ func connectDB() {
 }
 
 func main() {
-	dsn := "root:password@tcp(localhost:3306)/testdb"
+	dsn := "root:PlusOne98@17@tcp(127.0.0.1:3306)/testdb"
 	service, err := serviceinit.NewService(dsn)
 	if err != nil {
 		log.Fatalf("Failed to initialize services: %v", err)

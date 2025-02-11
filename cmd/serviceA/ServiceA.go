@@ -14,6 +14,7 @@ import (
 type ServiceA struct {
 	ServiceBURL string
 }
+//C:\Users\tarang\Desktop\IstiodPOC\IstiodPOCBluepi\cmd\serviceA\ServiceA.go
 
 func (s *ServiceA) FetchProducts() ([]models.ProductWithMetadata, error) {
 	resp, err := http.Get(s.ServiceBURL + "/products")
