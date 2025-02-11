@@ -4,8 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	
 	"net/http"
+	"os"
+	"strings"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/go-resty/resty/v2"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yourusername/IstiodPOCBluepi/models"
@@ -22,13 +28,94 @@ import (
 //   }
 
 
-
 type ServiceA struct {
-	ServiceBURL string
+	ServiceBURL    string
+	Auth0Domain    string
+	Audience       string
+	ClientID       string
+	ClientSecret   string
+}
+
+func NewServiceA() *ServiceA {
+	return &ServiceA{
+		ServiceBURL:    "http://service-b.default.svc.cluster.local:8081",
+		Auth0Domain:    os.Getenv("AUTH0_DOMAIN"),
+		Audience:       os.Getenv("AUTH0_AUDIENCE"),
+		ClientID:       os.Getenv("AUTH0_CLIENT_ID"),
+		ClientSecret:   os.Getenv("AUTH0_CLIENT_SECRET"),
+	}
 }
 //C:\Users\tarang\Desktop\IstiodPOC\IstiodPOCBluepi\cmd\serviceA\ServiceA.go
 
+
+
+// Fetch JWT Token from Auth0
+func (s *ServiceA) getJWTToken() (string, error) {
+	client := resty.New()
+	resp, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(map[string]string{
+			"grant_type":    "client_credentials",
+			"client_id":     s.ClientID,
+			"client_secret": s.ClientSecret,
+			"audience":      s.Audience,
+		}).
+		Post(fmt.Sprintf("https://%s/oauth/token", s.Auth0Domain))
+
+	if err != nil {
+		return "", fmt.Errorf("failed to request JWT token: %v", err)
+	}
+
+	var result map[string]string
+	if err := json.Unmarshal(resp.Body(), &result); err != nil {
+		return "", fmt.Errorf("failed to decode JWT response: %v", err)
+	}
+
+	token, ok := result["access_token"]
+	if !ok {
+		return "", fmt.Errorf("JWT token missing in response")
+	}
+
+	return token, nil
+}
+
+
+// Middleware to Validate JWT Token
+func (s *ServiceA) ValidateJWT(tokenString string) (*jwt.Token, error) {
+	jwksURL := fmt.Sprintf("https://%s/.well-known/jwks.json", s.Auth0Domain)
+
+	resp, err := http.Get(jwksURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch JWKS: %v", err)
+	}
+	defer resp.Body.Close()
+
+	var jwks struct {
+		Keys []map[string]interface{} `json:"keys"`
+	}
+	json.NewDecoder(resp.Body).Decode(&jwks)
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		kid := token.Header["kid"]
+		for _, key := range jwks.Keys {
+			if key["kid"] == kid {
+				return []byte(key["x5c"].(string)), nil
+			}
+		}
+		return nil, fmt.Errorf("no matching key found")
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return token, nil
+}
+
+
+
+
 func (s *ServiceA) FetchProducts() ([]models.ProductWithMetadata, error) {
+	
 	resp, err := http.Get(s.ServiceBURL + "/products")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch products: %v", err)
@@ -73,31 +160,81 @@ func (s *ServiceA) CreateProduct(p models.Product) (*models.ProductWithMetadata,
 
 func main() {
 	r := gin.Default()
-	svcA := &ServiceA{ServiceBURL: "http://service-b.default.svc.cluster.local:8081"}
+	svcA := NewServiceA()
 
+	authMiddleware := func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization Header"})
+			c.Abort()
+			return
+		}
 
-	r.GET("/products", func(c *gin.Context) {
-		products, err := svcA.FetchProducts()
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		token, err := svcA.ValidateJWT(tokenString)
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or Expired Token"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+
+	r.GET("/products",authMiddleware ,  func(c *gin.Context) {
+
+		tokenString, _ := svcA.getJWTToken()
+		req, _ := http.NewRequest("GET", svcA.ServiceBURL+"/products", nil)
+		req.Header.Set("Authorization", "Bearer "+tokenString)
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
 		if err != nil {
 			c.JSON(500, gin.H{"error": "Failed to fetch products"})
 			return
 		}
+		defer resp.Body.Close()
+
+		var products []map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&products)
+
 		c.JSON(200, products)
 	})
 
-	r.POST("/products", func(c *gin.Context) {
+	r.POST("/products", authMiddleware, func(c *gin.Context) {
 		var p models.Product
 		if err := c.ShouldBindJSON(&p); err != nil {
 			c.JSON(400, gin.H{"error": "Invalid input"})
 			return
 		}
-
-		createdProduct, err := svcA.CreateProduct(p)
+	
+		// Extract the JWT token from the request
+		tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
+	
+		// Send request to Service B with JWT token
+		jsonData, _ := json.Marshal(p)
+		req, err := http.NewRequest("POST", svcA.ServiceBURL+"/products", bytes.NewBuffer(jsonData))
 		if err != nil {
-			c.JSON(500, gin.H{"error": "Failed to create product in Service B"})
+			c.JSON(500, gin.H{"error": "Failed to create request for Service B"})
 			return
 		}
-
+		req.Header.Set("Authorization", "Bearer "+tokenString)
+		req.Header.Set("Content-Type", "application/json")
+	
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			c.JSON(500, gin.H{"error": "Failed to send request to Service B"})
+			return
+		}
+		defer resp.Body.Close()
+	
+		var createdProduct models.ProductWithMetadata
+		if err := json.NewDecoder(resp.Body).Decode(&createdProduct); err != nil {
+			c.JSON(500, gin.H{"error": "Failed to decode response from Service B"})
+			return
+		}
+	
 		c.JSON(201, createdProduct)
 	})
 
