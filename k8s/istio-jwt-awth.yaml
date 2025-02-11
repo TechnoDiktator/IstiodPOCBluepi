@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: service-b-jwt-auth
+spec:
+  selector:
+    matchLabels:
+      app: service-b
+  jwtRules:
+  - issuer: "https://your-issuer.com"
+    jwksUri: "https://your-issuer.com/.well-known/jwks.json"

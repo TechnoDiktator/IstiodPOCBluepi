@@ -1,0 +1,16 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: service-b-rbac
+spec:
+  selector:
+    matchLabels:
+      app: service-b
+  rules:
+  - from:
+    - source:
+        requestPrincipals: ["https://your-issuer.com/service-a"]
+    to:
+    - operation:
+        methods: ["GET", "POST"]
+        paths: ["/products"]
