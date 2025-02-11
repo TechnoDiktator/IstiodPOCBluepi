@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"fmt"
 	"log"
 
@@ -13,10 +12,9 @@ import (
 	"github.com/yourusername/IstiodPOCBluepi/serviceinit"
 )
 
-
-
 func main() {
-	dsn := "root:PlusOne98@17@tcp(127.0.0.1:3306)/testdb"
+	fmt.Printf("Connecting To Db")
+	dsn := "root:PlusOne98@17@tcp(127.0.0.1:3306)/product_db"
 	service, err := serviceinit.NewService(dsn)
 	if err != nil {
 		log.Fatalf("Failed to initialize services: %v", err)
