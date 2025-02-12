@@ -1,11 +1,11 @@
-apiVersion: security.istio.io/v1beta1
-kind: RequestAuthentication
-metadata:
-  name: service-b-jwt-auth
-spec:
-  selector:
-    matchLabels:
-      app: service-b
-  jwtRules:
-  - issuer: "https://dev-s8pk7mul3yw2xy77.us.auth0.com"
-    jwksUri: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/.well-known/jwks.json"
+# apiVersion: security.istio.io/v1beta1
+# kind: RequestAuthentication
+# metadata:
+#   name: service-b-jwt-auth
+# spec:
+#   selector:
+#     matchLabels:
+#       app: service-b
+#   jwtRules:
+#   - issuer: "https://dev-s8pk7mul3yw2xy77.us.auth0.com"
+#     jwksUri: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/.well-known/jwks.json"

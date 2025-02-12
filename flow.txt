@@ -22,6 +22,46 @@ New Flow Works Without Code-Based Authentication
 
 
 
+🔹 How Istio Handles Unauthorized Requests
+If a request fails authentication (RequestAuthentication) or authorization (AuthorizationPolicy), 
+Istio immediately rejects it before it reaches your service.
+
+📌 Example Response from Istio When JWT is Missing
+
+json
+Copy
+Edit
+{
+  "message": "Unauthorized"
+}
+📌 Example Response from Istio When Access is Denied
+
+json
+Copy
+Edit
+{
+  "message": "RBAC: access denied"
+}
+❌ You cannot modify these responses inside your Go code.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // OLD FLOW
 
 Setup has three services (Service A, Service B, and Service C), secured using Auth0 for user authentication and Istio for service-to-service authentication.
