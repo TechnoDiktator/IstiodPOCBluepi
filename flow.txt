@@ -1,3 +1,29 @@
+New Flow Works Without Code-Based Authentication
+
+1️⃣ User logs in via Auth0 and gets a JWT token.
+2️⃣ User sends request to Service A with the JWT token.
+3️⃣ Istio checks the JWT before allowing traffic to Service A.
+4️⃣ Service A calls Service C (JWT is forwarded).
+5️⃣ Istio verifies JWT before allowing traffic to Service C.
+6️⃣ Service C calls Service B (JWT is forwarded).
+7️⃣ Istio verifies JWT before allowing traffic to Service B.
+8️⃣ Service B processes the request and returns data.
+
+
+✔️ Removes the need for JWT validation in application code.
+✔️ Istio ensures only valid JWT tokens reach your services.
+✔️ Centralized authentication & authorization across all services.
+✔️ No changes required when switching identity providers (e.g., Auth0 → Okta).
+✔️ Less boilerplate in your Go services (focus only on business logic).
+
+🚀 Now, your services are fully secured using Istio without any JWT validation in the code! Let me
+
+
+
+
+
+// OLD FLOW
+
 Setup has three services (Service A, Service B, and Service C), secured using Auth0 for user authentication and Istio for service-to-service authentication.
 
 1️⃣ A user logs in and gets a JWT token from Auth0.

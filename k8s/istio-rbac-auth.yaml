@@ -1,7 +1,28 @@
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: service-b-rbac
+  name: service-c-policy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: service-c
+  rules:
+  - from:
+    - source:
+        requestPrincipals: ["*"]  # Only allow valid JWT users
+    - source:
+        principals: ["cluster.local/ns/default/sa/service-a"]  # Allow only Service A
+    to:
+    - operation:
+        methods: ["GET", "POST"]
+        paths: ["/products"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: service-b-policy
+  namespace: default
 spec:
   selector:
     matchLabels:
@@ -9,7 +30,7 @@ spec:
   rules:
   - from:
     - source:
-        requestPrincipals: ["https://dev-s8pk7mul3yw2xy77.us.auth0.com/service-a"]
+        principals: ["cluster.local/ns/default/sa/service-c"]  # Allow only Service C
     to:
     - operation:
         methods: ["GET", "POST"]
