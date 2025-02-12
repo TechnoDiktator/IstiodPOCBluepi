@@ -23,6 +23,7 @@ type ServiceB struct {
 }
 
 func NewServiceB() *ServiceB {
+	
 	return &ServiceB{
 		Auth0Domain: os.Getenv("AUTH0_DOMAIN"), // Set this in environment variables
 	}
@@ -92,7 +93,8 @@ func main() {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or Expired Token"})
 			c.Abort()
 			return
-		}
+		}	
+		
 
 		c.Next()
 	}
