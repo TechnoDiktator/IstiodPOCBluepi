@@ -1,16 +1,18 @@
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: service-b-policy
+  name: service-c-policy
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: service-b
+      app: service-c
   rules:
   - from:
     - source:
-        principals: ["cluster.local/ns/default/sa/service-a"]
+        requestPrincipals: ["*"]  # Only allow valid JWT users
+    - source:
+        principals: ["cluster.local/ns/default/sa/service-a"]  # Allow only Service A
     to:
     - operation:
         methods: ["GET", "POST"]
