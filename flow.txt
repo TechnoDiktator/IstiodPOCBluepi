@@ -1,0 +1,140 @@
+Setup has three services (Service A, Service B, and Service C), secured using Auth0 for user authentication and Istio for service-to-service authentication.
+
+1️⃣ A user logs in and gets a JWT token from Auth0.
+2️⃣ The user sends a request to Service A, including the JWT token in the Authorization header.
+3️⃣ Service A validates the JWT token using Auth0 (inside the Go code).
+4️⃣ Service A forwards the request to Service C, including the JWT token.
+5️⃣ Istio mTLS ensures that only Service A can talk to Service C (service-to-service authentication).
+6️⃣ Service C validates the JWT token using Auth0 (inside the Go code).
+7️⃣ Service C forwards the request to Service B, including the JWT token.
+8️⃣ Istio mTLS ensures that only Service C can talk to Service B.
+9️⃣ Service B validates the JWT token using Auth0 (inside the Go code).
+🔟 Service B responds to Service C → Service A → Client.
+
+
+setup has three services (Service A, Service B, and Service C), secured using Auth0 for user authentication and Istio for service-to-service authentication.
+
+
+Step-by-Step Flow
+1️⃣ Client Requests a JWT Token from Auth0
+    The user logs in to Auth0 using OAuth.
+    Auth0 generates a JWT token and returns it to the client.
+    The client includes the JWT token in the Authorization header for every request.
+
+JWT EXAMPLE
+{
+  "alg": "RS256",
+  "typ": "JWT",
+  "kid": "some-key-id"
+}
+{
+  "iss": "https://dev-s8pk7mul3yw2xy77.us.auth0.com/",
+  "sub": "auth0|user123",
+  "exp": 1700000000
+}
+
+
+
+
+
+
+
+2️⃣ Client Calls Service A (API Gateway)
+📌 Request to Service A:
+
+http
+Copy
+Edit
+GET /products
+Host: service-a.example.com
+Authorization: Bearer <JWT_TOKEN>
+
+Service A is exposed through an Istio Ingress Gateway.
+Istio allows external traffic via a VirtualService.
+Service A validates the JWT token using Auth0’s JWKS keys.
+✅ If the JWT is valid, Service A forwards the request to Service C.
+❌ If the JWT is invalid, Service A returns 401 Unauthorized.
+
+
+
+
+
+
+
+3️⃣ Service A Calls Service C
+📌 Internal Request (Service A → Service C)
+
+http
+Copy
+Edit
+GET /products
+Host: service-c.default.svc.cluster.local
+Authorization: Bearer <JWT_TOKEN>
+Istio mTLS enforces authentication between Service A and Service C.
+Service A forwards the JWT token to Service C.
+Service C validates the JWT using Auth0.
+✅ If JWT is valid & Istio allows traffic, request continues.
+❌ If JWT is invalid, Service C returns 401 Unauthorized.
+
+
+
+
+
+
+
+4️⃣ Service C Calls Service B
+📌 Internal Request (Service C → Service B)
+
+http
+Copy
+Edit
+GET /products
+Host: service-b.default.svc.cluster.local
+Authorization: Bearer <JWT_TOKEN>
+Istio mTLS enforces authentication between Service C and Service B.
+Service C forwards the JWT token to Service B.
+Service B validates the JWT using Auth0.
+Service B queries MySQL for product data.
+✅ If JWT is valid & Istio allows traffic, Service B fetches data from MySQL and responds.
+❌ If JWT is invalid, Service B returns 401 Unauthorized.
+
+
+
+
+
+
+
+
+
+5️⃣ Service B Returns Data to Service C → Service A → Client
+📌 Response from Service B to Service C
+
+json
+Copy
+Edit
+[
+  {
+    "id": 1,
+    "name": "Laptop",
+    "price": 1000
+  }
+]
+Service C receives the response and forwards it to Service A.
+Service A sends the final response to the client.
+📌 Final Response to Client
+
+json
+Copy
+Edit
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Laptop",
+      "price": 1000
+    }
+  ],
+  "serviceA_metadata": "request processed at 2025-02-12T08:00:00Z"
+}
+✅ The client successfully receives the product list!
+
