@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -14,14 +12,14 @@ import (
 )
 
 type ServiceC struct {
-	ServiceBURL  string
-	Auth0Domain  string
+	ServiceBURL string
+	Auth0Domain string
 }
 
 func NewServiceC() *ServiceC {
 	return &ServiceC{
 		ServiceBURL: os.Getenv("SERVICE_B_URL"), // Fetch Service B URL from env
-		Auth0Domain: os.Getenv("AUTH0_DOMAIN"), // Fetch Auth0 domain from env
+		Auth0Domain: os.Getenv("AUTH0_DOMAIN"),  // Fetch Auth0 domain from env
 	}
 }
 
@@ -115,6 +113,3 @@ func main() {
 	fmt.Println("Service C is running on port 8083")
 	r.Run(":8083")
 }
-
-
-

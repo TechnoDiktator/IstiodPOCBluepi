@@ -14,12 +14,15 @@ spec:
     spec:
       containers:
       - name: service-c
-        image: yourdockerhubusername/service-c:latest
+        image: tarang412/service-c:latest
         ports:
         - containerPort: 8083
         env:
         - name: SERVICE_B_URL
-          value: "http://service-b.default.svc.cluster.local:8081"
+          valueFrom:
+            secretKeyRef:
+              name: service-config-secret
+              key: SERVICE_B_URL
         - name: AUTH0_DOMAIN
           valueFrom:
             secretKeyRef:
