@@ -1,0 +1,126 @@
+    1  cleaar
+    2  clear
+    3  whoami
+    4  pwd
+    5  clear
+    6  wsl
+    7  clear
+    8  exit
+    9  exit
+   10  whoami
+   11  sudo su 
+   12  cleaar
+   13  clear
+   14  whoami
+   15  pwd
+   16  sudo su
+   17  curl -L https://istio.io/downloadIstio | sh -
+   18  sudo apt update
+   19  sudo apt install tmux
+   20  tmux
+   21  # Navigate to your Windows C: drive
+   22  cd /mnt/c/Users/YourUsername/Documents
+   23  # List files in a Windows directory
+   24  ls
+   25  # Run a Windows executable (e.g., a Python script)
+   26  python3 script.py
+   27  lcear
+   28  clear
+   29  /mnt/c/Windows/System32/notepad.exe
+   30  sudo systemctl status doicker
+   31  sudo systemctl status docker
+   32  sudo apt install apt-transport-https ca-certificates curl software-properties-common
+   33  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+   34  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+   35  apt-cache policy docker-ce
+   36  sudo apt install docker-ce
+   37  sudo systemctl status docker
+   38  clear
+   39  sudo snap install microk8s --classic
+   40  sudo usermod -a -G microk8s $USER
+   41  sudo chown -f -R $USER ~/.kube
+   42  su - $USER
+   43  microk8s status --wait-ready
+   44  free -h
+   45  clear
+   46  free -h
+   47  clear
+   48  free -h
+   49  wsl
+   50  pwd
+   51  clear
+   52  exit
+   53  clear
+   54  minikube version
+   55  istio version
+   56  ls
+   57  clear
+   58  cd
+   59  clear
+   60  ls
+   61  kubectl status
+   62  kubectl version
+   63  kubectl
+   64  kubectl get pods
+   65  ls
+   66  clear
+   67  minikube version
+   68  ls
+   69  kubectl get pods
+   70  kubectl get pods -A
+   71  kubectl get deployments -A
+   72  kubectl get services -A
+   73  kubectl get nodes
+   74  minikube status
+   75  minikube start
+   76  kubectl config current-context
+   77  kubectl get nodes
+   78  kubectl get pods -A
+   79  kubectl get deployments -A
+   80  kubectl logs -n istio-system istiod-7b85db5767-w7qh6
+   81  kubectl logs -n kube-system storage-provisioner
+   82  kubectl delete pod -n istio-system istiod-7b85db5767-w7qh6
+   83  kubectl delete pod -n kube-system storage-provisioner
+   84  minikube addons list
+   85  minikube addons enable storage-provisioner
+   86  minikube addons enable default-storageclass
+   87  kubectl get svc -A
+   88  kubectl get endpoints -A
+   89  postgresql --version
+   90  postgresql version
+   91  psql
+   92  sudo apt install postgresql-client-common
+   93  psql --version
+   94  sudo apt install postgresql-client-15
+   95  cd /etc/postgresql-common/
+   96  ls
+   97  cleaar
+   98  cd
+   99  cleaar
+  100  clear
+  101  clwar
+  102  cleart
+  103  clear
+  104  ls
+  105  cd serviceA/
+  106  go run ServiceA.go 
+  107  cd ../serviceB/
+  108  go run ServiceB.go 
+  109  ls
+  110  clwear
+  111  clear
+  112  go run ServiceB.go 
+  113  mysql --version
+  114  sudo mysql -u root
+  115  mysql version
+  116  sudo service mysql status
+  117  ls
+  118  cat ServiceB.go 
+  119  go run ServiceB.go 
+  120  mysql -u root -p
+  121  sudo service mysql start
+  122  sudo mysql -u root -p
+  123  go run ServiceB.go 
+  124  clear
+  125  cd ..
+  126  history > histort.txt 
