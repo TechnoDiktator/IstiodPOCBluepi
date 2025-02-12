@@ -28,7 +28,7 @@ spec:
     matchLabels:
       app: service-b
   rules:
-  # ✅ Allow admins to access everything
+  #  Allow admins to access everything
   - from:
     - source:
         requestPrincipals: ["*"]  # Any authenticated user
@@ -38,9 +38,9 @@ spec:
         paths: ["/products"]
     when:
     - key: request.auth.claims[role]
-      values: ["admin"]  # ✅ Only admins can access everything
+      values: ["admin"]  #  Only admins can access everything
 
-  # ✅ Allow users to only GET products
+  #  Allow users to only GET products
   - from:
     - source:
         requestPrincipals: ["*"]
@@ -50,4 +50,4 @@ spec:
         paths: ["/products"]
     when:
     - key: request.auth.claims[role]
-      values: ["user"]  # ✅ Users can only GET products
+      values: ["user"]  #  Users can only GET products
