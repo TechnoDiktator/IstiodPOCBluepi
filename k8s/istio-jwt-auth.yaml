@@ -23,3 +23,7 @@ spec:
   jwtRules:
   - issuer: "https://dev-s8pk7mul3yw2xy77.us.auth0.com"
     jwksUri: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/.well-known/jwks.json"
+
+
+#  Now, Istio will enforce JWT authentication for both Service C and Service B separately.
+#  Requests without a valid JWT token will be blocked before reaching the services.
