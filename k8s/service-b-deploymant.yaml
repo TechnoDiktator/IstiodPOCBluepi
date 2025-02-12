@@ -17,3 +17,18 @@ spec:
         image: tarang412/service-b:latest
         ports:
         - containerPort: 8081
+      env:
+        - name: DB_HOST
+          value: "mysql.default.svc.cluster.local"
+        - name: DB_USER
+          value: "root"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_DATABASE
