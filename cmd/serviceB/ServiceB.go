@@ -70,7 +70,19 @@ func (s *ServiceB) ValidateJWT(tokenString string) (*jwt.Token, error) {
 
 func main() {
 	fmt.Printf("Connecting To Db ================== starting service b")
-	dsn := "root:PlusOne98@17@tcp(127.0.0.1:3306)/product_db"
+	//dsn := "root:PlusOne98@17@tcp(127.0.0.1:3306)/product_db"
+	
+	
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_NAME"),
+	)
+
+	
+	
+	
 	service, err := serviceinit.NewService(dsn)
 	if err != nil {
 		log.Fatalf("Failed to initialize services: %v", err)
