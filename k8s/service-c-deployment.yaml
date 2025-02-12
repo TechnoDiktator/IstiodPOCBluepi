@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-c
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: service-c
+  template:
+    metadata:
+      labels:
+        app: service-c
+    spec:
+      containers:
+      - name: service-c
+        image: yourdockerhubusername/service-c:latest
+        ports:
+        - containerPort: 8083
+        env:
+        - name: SERVICE_B_URL
+          value: "http://service-b.default.svc.cluster.local:8081"
+        - name: AUTH0_DOMAIN
+          valueFrom:
+            secretKeyRef:
+              name: auth0-secret
+              key: AUTH0_DOMAIN
