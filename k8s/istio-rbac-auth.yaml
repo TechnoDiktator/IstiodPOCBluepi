@@ -21,17 +21,33 @@ spec:
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: service-b-policy
+  name: service-b-rbac
   namespace: default
 spec:
   selector:
     matchLabels:
       app: service-b
   rules:
+  # ✅ Allow admins to access everything
   - from:
     - source:
-        principals: ["cluster.local/ns/default/sa/service-c"]  # Allow only Service C
+        requestPrincipals: ["*"]  # Any authenticated user
     to:
     - operation:
         methods: ["GET", "POST"]
         paths: ["/products"]
+    when:
+    - key: request.auth.claims[role]
+      values: ["admin"]  # ✅ Only admins can access everything
+
+  # ✅ Allow users to only GET products
+  - from:
+    - source:
+        requestPrincipals: ["*"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/products"]
+    when:
+    - key: request.auth.claims[role]
+      values: ["user"]  # ✅ Users can only GET products
