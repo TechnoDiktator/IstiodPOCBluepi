@@ -1,0 +1,22 @@
++------------------------------+
+|  Kubernetes API Server       |  ← Talks to etcd (cluster state)
++------------------------------+
+            ▲
+            | Watches pod assignments
+            ▼
++------------------------------+
+|  Kubelet (Node Controller)   |  ← Watches API Server
++------------------------------+
+            ▲
+            | Talks to CRI (Container Runtime Interface)
+            ▼
++------------------------------+
+|  Container Runtime (containerd, CRI-O) |  ← Starts & manages containers
++------------------------------+
+            ▲
+            | Runs & monitors containers
+            ▼
++------------------------------+
+|  Running Containers          |  ← Actual state
++------------------------------+
+
