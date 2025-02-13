@@ -15,6 +15,7 @@ spec:
       containers:
       - name: service-a
         image: tarang412/service-a:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8082
         env:
