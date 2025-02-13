@@ -10,8 +10,6 @@ spec:
   rules:
   - from:
     - source:
-        requestPrincipals: ["*"]  # Only allow valid JWT users
-    - source:
         principals: ["cluster.local/ns/default/sa/service-a"]  # Allow only Service A
     to:
     - operation:
