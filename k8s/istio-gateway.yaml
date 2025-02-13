@@ -2,7 +2,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: service-a-gateway
-  namespace: istio-system  # 👈 Ensure it is deployed in istio-system
+  namespace: istio-system  # 👈 Move it to istio-system
 spec:
   selector:
     istio: ingressgateway
@@ -18,17 +18,18 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: service-a
+  namespace: default  # 👈 Keep VirtualService in default
 spec:
   hosts:
   - "*"
   gateways:
-  - service-a-gateway
+  - istio-system/service-a-gateway  # 👈 Reference the correct namespace
   http:
   - match:
     - uri:
         prefix: /products
     route:
     - destination:
-        host: service-a
+        host: service-a.default.svc.cluster.local  # 👈 Use FQDN for cross-namespace routing
         port:
           number: 8082
