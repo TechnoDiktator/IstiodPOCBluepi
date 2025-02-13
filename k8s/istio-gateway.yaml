@@ -2,6 +2,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: service-a-gateway
+  namespace: istio-system  # 👈 Ensure it is deployed in istio-system
 spec:
   selector:
     istio: ingressgateway
