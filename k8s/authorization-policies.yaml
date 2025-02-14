@@ -1,7 +1,7 @@
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: service-c-policy
+  name: service-c-auth-policy
   namespace: default
 spec:
   selector:
@@ -10,7 +10,7 @@ spec:
   rules:
   - from:
     - source:
-        principals: ["cluster.local/ns/default/sa/service-a"]  # Allow only Service A
+        requestPrincipals: ["*"]  # ✅ Only allow requests with a valid JWT
     to:
     - operation:
         methods: ["GET", "POST"]
@@ -19,33 +19,35 @@ spec:
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: service-b-rbac
+  name: service-b-auth-policy
   namespace: default
 spec:
   selector:
     matchLabels:
       app: service-b
   rules:
-  #  Allow admins to access everything
-  - from:
-    - source:
-        requestPrincipals: ["*"]  # Any authenticated user
-    to:
-    - operation:
-        methods: ["GET", "POST"]
-        paths: ["/products"]
-    when:
-    - key: request.auth.claims[role]
-      values: ["admin"]  #  Only admins can access everything
-
-  #  Allow users to only GET products
   - from:
     - source:
         requestPrincipals: ["*"]
     to:
     - operation:
-        methods: ["GET"]
+        methods: ["GET", "POST"]
         paths: ["/products"]
-    when:
-    - key: request.auth.claims[role]
-      values: ["user"]  #  Users can only GET products
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: service-a-auth-policy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: service-a
+  rules:
+  - from:
+    - source:
+        requestPrincipals: ["*"]
+    to:
+    - operation:
+        methods: ["GET", "POST"]
+        paths: ["/"]

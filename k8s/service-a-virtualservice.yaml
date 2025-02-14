@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: service-a
+  namespace: default
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-system/service-a-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /products  # Example API
+    route:
+    - destination:
+        host: service-a.default.svc.cluster.local
+        port:
+          number: 8082

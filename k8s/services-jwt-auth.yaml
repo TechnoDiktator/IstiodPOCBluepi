@@ -1,0 +1,56 @@
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: service-c-auth0-jwt
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: service-c
+  jwtRules:
+  - issuer: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/"
+    jwksUri: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/.well-known/jwks.json"
+    forwardOriginalToken: true  # ✅ Forward JWT to the backend
+    fromHeaders:  # ✅ Define where JWT is expected
+      - name: Authorization
+        prefix: "Bearer "
+    fromParams:  # ✅ Allow JWT from query params (optional)
+      - token
+---
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: service-b-auth0-jwt
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: service-b
+  jwtRules:
+  - issuer: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/"
+    jwksUri: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/.well-known/jwks.json"
+    forwardOriginalToken: true
+    fromHeaders:
+      - name: Authorization
+        prefix: "Bearer "
+    fromParams:
+      - token
+---
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: service-a-auth0-jwt
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: service-a
+  jwtRules:
+  - issuer: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/"
+    jwksUri: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/.well-known/jwks.json"
+    forwardOriginalToken: true
+    fromHeaders:
+      - name: Authorization
+        prefix: "Bearer "
+    fromParams:
+      - token

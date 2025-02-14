@@ -1,0 +1,6 @@
+curl --request POST   --url https://dev-s8pk7mul3yw2xy77.us.auth0.com/oauth/token   --header 'content-type: application/json'   --data '{
+    "client_id": "sAJoKYuqhtSrOITyibPewyZ3crOa3sOt",
+    "client_secret": "T3hDMWX5iDr2QuFK54gZzfeXWqbgw1iuaHWTNJpXN88jEoXjAbsQ35bZolriW3h_",
+    "audience": "https://dev-s8pk7mul3yw2xy77.us.auth0.com/api/v2/",
+    "grant_type": "client_credentials"
+  }'   
