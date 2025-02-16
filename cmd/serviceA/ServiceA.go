@@ -51,7 +51,7 @@ func main() {
 
 		var products []map[string]interface{}
 		if err := json.NewDecoder(resp.Body).Decode(&products); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode response"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode response FROM Service C"})
 			return
 		}
 

@@ -5,13 +5,11 @@ metadata:
   namespace: default
 spec:
   hosts:
-  - "*"
-  gateways:
-  - istio-system/service-a-gateway
+  - service-c.default.svc.cluster.local  # Internal service
   http:
   - match:
     - uri:
-        prefix: /products  # Example API
+        prefix: /products
     route:
     - destination:
         host: service-c.default.svc.cluster.local

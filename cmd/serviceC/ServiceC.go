@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	//"log"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -33,12 +33,14 @@ func main() {
 		token := c.GetHeader("Authorization")
 		if token == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization Header"})
+			log.Println("Missing Authorization Header")
 			return
 		}
 
 		req, err := http.NewRequest("GET", svcC.ServiceBURL+"/products", nil)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request for Service B"})
+			log.Println("Failed to create request for Service B")
 			return
 		}
 
@@ -48,6 +50,7 @@ func main() {
 		resp, err := client.Do(req)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to reach Service B"})
+			log.Println("Failed to reach Service B")
 			return
 		}
 		defer resp.Body.Close()
@@ -55,6 +58,7 @@ func main() {
 		var products []models.Product
 		if err := json.NewDecoder(resp.Body).Decode(&products); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode response from Service B"})
+			log.Panicln("Failed to decode response from Service B")
 			return
 		}
 
@@ -70,12 +74,14 @@ func main() {
 		token := c.GetHeader("Authorization")
 		if token == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization Header"})
+			log.Println("Missing Authorization Header")
 			return
 		}
 
 		var p models.Product
 		if err := c.ShouldBindJSON(&p); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+			log.Println("Invalid input")
 			return
 		}
 
@@ -83,6 +89,7 @@ func main() {
 		req, err := http.NewRequest("POST", svcC.ServiceBURL+"/products", bytes.NewBuffer(jsonData))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request for Service B"})
+			log.Println("Failed to create request for Service B")
 			return
 		}
 
@@ -93,6 +100,7 @@ func main() {
 		resp, err := client.Do(req)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to reach Service B"})
+			log.Println("Failed to reach Service B")
 			return
 		}
 		defer resp.Body.Close()
@@ -100,6 +108,7 @@ func main() {
 		var createdProduct models.Product
 		if err := json.NewDecoder(resp.Body).Decode(&createdProduct); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode response from Service B"})
+			log.Println("Failed to decode response from Service B")
 			return
 		}
 

@@ -39,3 +39,16 @@ spec:
             secretKeyRef:
               name: auth0-secret
               key: AUTH0_CALLBACK_URL
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-a
+spec:
+  type: ClusterIP
+  selector:
+    app: service-a
+  ports:
+    - port: 8082
+      targetPort: 8082

@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -27,8 +28,17 @@ func NewMySQLDB(dsn string) (*MySQLDB, error) {
 }
 
 func (m *MySQLDB) GetProducts() ([]models.Product, error) {
+	log.Println("================ GetProducts Start =================")
+
+	// Check if DB connection is nil
+	if m.Conn == nil {
+		log.Panicln(" Database connection is nil!")
+		return nil, fmt.Errorf("database connection is nil")
+	}
+
 	rows, err := m.Conn.Query("SELECT id, name, price FROM products")
 	if err != nil {
+		log.Panicln(" Query failed:", err)  // ✅ Print the error
 		return nil, err
 	}
 	defer rows.Close()
@@ -37,14 +47,26 @@ func (m *MySQLDB) GetProducts() ([]models.Product, error) {
 	for rows.Next() {
 		var p models.Product
 		if err := rows.Scan(&p.ID, &p.Name, &p.Price); err != nil {
+			log.Panicln(" Error scanning row:", err)  // ✅ Print scan errors
 			return nil, err
 		}
 		products = append(products, p)
 	}
+	if len(products) == 0 {
+		log.Println("⚠️ No products found, returning empty array")
+	}
+	log.Println("================ GetProducts End =================")
 	return products, nil
 }
 
+
 func (m *MySQLDB) CreateProduct(p models.Product) error {
+	log.Println("================ CreateProduct Start =================")
 	_, err := m.Conn.Exec("INSERT INTO products (name, price) VALUES (?, ?)", p.Name, p.Price)
+	log.Println("================ CreateProduct End =================")
+	if err != nil {
+		log.Println("Error in CreateProduct")
+		log.Println(err)
+	}
 	return err
 }

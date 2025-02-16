@@ -5,13 +5,13 @@ metadata:
   namespace: default
 spec:
   hosts:
-  - "*"
+  - "*"  # Accept requests from anywhere
   gateways:
-  - istio-system/service-a-gateway
+  - istio-system/service-a-gateway  # External traffic via Istio Ingress
   http:
   - match:
     - uri:
-        prefix: /products  # Example API
+        prefix: /products
     route:
     - destination:
         host: service-a.default.svc.cluster.local

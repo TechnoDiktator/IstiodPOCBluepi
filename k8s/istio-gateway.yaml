@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: service-a-gateway
+  name: istio-ingressgateway
   namespace: istio-system  # 👈 Move it to istio-system
 spec:
   selector:
@@ -23,7 +23,7 @@ spec:
   hosts:
   - "*"
   gateways:
-  - istio-system/service-a-gateway  # 👈 Reference the correct namespace
+  - istio-system/istio-ingressgateway  # 👈 Reference the correct namespace
   http:
   - match:
     - uri:

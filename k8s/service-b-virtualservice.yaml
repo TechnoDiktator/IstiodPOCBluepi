@@ -5,18 +5,13 @@ metadata:
   namespace: default
 spec:
   hosts:
-  - "*"
-  gateways:
-  - istio-system/service-a-gateway
+  - service-b.default.svc.cluster.local  # Internal service
   http:
   - match:
     - uri:
-        prefix: /products  # Example API
+        prefix: /products
     route:
     - destination:
         host: service-b.default.svc.cluster.local
         port:
           number: 8081
-
-
-# all the virtualservices have the same gateway ????? 

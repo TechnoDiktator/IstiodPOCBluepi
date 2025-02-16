@@ -10,6 +10,8 @@ spec:
   jwtRules:
   - issuer: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/"
     jwksUri: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/.well-known/jwks.json"
+    audiences:
+      - "https://dev-s8pk7mul3yw2xy77.us.auth0.com/api/v2/"  # ✅ Must match JWT "aud"
     forwardOriginalToken: true  # ✅ Forward JWT to the backend
     fromHeaders:  # ✅ Define where JWT is expected
       - name: Authorization
@@ -29,6 +31,8 @@ spec:
   jwtRules:
   - issuer: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/"
     jwksUri: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/.well-known/jwks.json"
+    audiences:
+      - "https://dev-s8pk7mul3yw2xy77.us.auth0.com/api/v2/"  # ✅ Must match JWT "aud"
     forwardOriginalToken: true
     fromHeaders:
       - name: Authorization
@@ -48,6 +52,8 @@ spec:
   jwtRules:
   - issuer: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/"
     jwksUri: "https://dev-s8pk7mul3yw2xy77.us.auth0.com/.well-known/jwks.json"
+    audiences:
+      - "https://dev-s8pk7mul3yw2xy77.us.auth0.com/api/v2/"  # ✅ Must match JWT "aud"
     forwardOriginalToken: true
     fromHeaders:
       - name: Authorization

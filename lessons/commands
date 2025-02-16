@@ -4,3 +4,6 @@ curl --request POST   --url https://dev-s8pk7mul3yw2xy77.us.auth0.com/oauth/toke
     "audience": "https://dev-s8pk7mul3yw2xy77.us.auth0.com/api/v2/",
     "grant_type": "client_credentials"
   }'   
+
+
+  minikube service istio-ingressgateway -n istio-system --url

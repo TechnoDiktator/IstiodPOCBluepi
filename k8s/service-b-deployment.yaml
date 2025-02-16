@@ -33,3 +33,15 @@ spec:
               secretKeyRef:
                 name: mysql-secret
                 key: MYSQL_DATABASE
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-b
+spec:
+  type: ClusterIP
+  selector:
+    app: service-b
+  ports:
+    - port: 8081
+      targetPort: 8081
