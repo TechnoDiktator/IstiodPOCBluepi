@@ -46,7 +46,9 @@ spec:
   rules:
   - from:
     - source:
-        requestPrincipals: ["*"]
+        requestPrincipals: ["*"]  # ✅ Allow requests with any valid JWT
+    - source:
+        namespaces: ["istio-system"]  # ✅ Allow requests from Istio Gateway
     to:
     - operation:
         methods: ["GET", "POST"]
