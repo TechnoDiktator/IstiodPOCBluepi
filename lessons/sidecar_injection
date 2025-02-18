@@ -1,0 +1,52 @@
+1️⃣ Sidecar Proxy Injection
+When Istio sidecar injection is enabled (either automatically or manually),
+ Istio injects a proxy container (Envoy) alongside the application container. 
+ This sidecar proxy is responsible for managing all network traffic to and from the 
+ application container.
+
+
+
+
+
+2️⃣ How the Sidecar Intercepts Traffic
+Inbound Traffic (Client → Pod)
+Client Request: A request (e.g., GET /products) comes to the pod, either from an external source (through Istio Ingress Gateway) or from another pod inside the cluster.
+
+Envoy Proxy Intercepts:
+The Envoy sidecar proxy running inside the pod intercepts all traffic directed to the application container. The request doesn't directly hit the application container; it first hits the sidecar.
+
+Traffic Handling by Envoy Proxy:
+Envoy examines the incoming request and applies various policies (e.g., mTLS, routing, JWT validation). Depending on the configuration, Istio can:
+
+Validate JWT tokens (if RequestAuthentication is configured).
+Apply mTLS to encrypt/decrypt the traffic.
+Route the traffic according to the VirtualService configuration.
+Forwarding to Application Container:
+After applying the necessary rules, Envoy forwards the traffic to the application container (e.g., service-a). This is done by communicating over localhost (127.0.0.1) within the pod, where the application container listens for traffic.
+
+
+
+Example: HTTP Request Flow
+Request: GET /products from a client.
+Envoy (sidecar proxy) intercepts the request.
+Envoy checks policies (JWT, mTLS) and forwards the request to the application container.
+Key Point:
+The application container doesn’t receive the request directly; it always goes through the sidecar proxy (Envoy) first.
+Outbound Traffic (Pod → External or Another Pod)
+Application Container Sends Response: Once the application container processes the request, it sends the response to the sidecar proxy (Envoy).
+
+Envoy Proxy Sends Response: Envoy then handles any necessary transformations (e.g., mTLS encryption, retries) before sending the response back to the client.
+
+
+
+3️⃣ Sidecar Proxy Configuration
+The sidecar proxy (Envoy) is configured to route the traffic using Envoy's proxy rules. These rules are defined by Istio’s configuration resources like VirtualService, DestinationRule, PeerAuthentication, and RequestAuthentication.
+
+Routing: The VirtualService and DestinationRule resources in Istio define how traffic should be routed through the mesh. They control things like:
+
+Which service the request should go to (e.g., service-a).
+Traffic splitting (e.g., canary deployments).
+Retries, timeouts, and circuit breaking.
+Authentication: JWT authentication can be enforced using RequestAuthentication policies, where Envoy checks the request for a valid JWT token before forwarding it to the backend service.
+
+mTLS: PeerAuthentication policies define whether traffic should be encrypted with mTLS between services. The sidecar proxies ensure that only encrypted traffic is allowed if mTLS is enabled.

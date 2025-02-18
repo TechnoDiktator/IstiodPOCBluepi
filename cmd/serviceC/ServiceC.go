@@ -62,6 +62,10 @@ func main() {
 			return
 		}
 
+		log.Println("Products fetched from Service B")
+		jsonData, _ := json.Marshal(products)
+		log.Println(string(jsonData))
+
 		c.JSON(http.StatusOK, gin.H{
 			"data":        products,
 			"requested_at": time.Now(),

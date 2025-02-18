@@ -1,0 +1,93 @@
+🔹 Why Is It Called a "Sidecar"?
+The term sidecar comes from the analogy of a sidecar motorcycle. The sidecar is attached to the main vehicle (application container) but operates as a separate entity. Similarly, the sidecar container in Istio is attached to the application container (in the same pod), but it operates independently to manage traffic, security, and monitoring.
+
+The sidecar doesn’t require modification of the application code.
+The application can continue running without worrying about networking, mTLS, or traffic management. The sidecar does all the heavy lifting.
+🔹 Example: Sidecar Proxy in Action
+Let’s say Service A wants to send a request to Service B. Here’s what happens:
+
+
+
+
+
+
+
+Service A's Request to Service B:
+
+Service A sends a request to Service B (e.g., GET /products).
+The sidecar proxy (Envoy) of Service A intercepts the request before it reaches the application container. It applies policies (e.g., routing, JWT validation) and routes the request to Service B.
+Service B's Response:
+
+Service B processes the request and sends a response back to Service A.
+The response first goes to Service B’s sidecar proxy.
+The sidecar proxy (Envoy) applies any policies (e.g., mTLS encryption, retries) and then forwards the response back to Service A’s sidecar proxy.
+Back to Service A:
+
+Service A’s sidecar proxy sends the response back to the application container of Service A.
+In this flow, the application container never directly communicates with other services; it always goes through the sidecar proxy (Envoy).
+
+
+
+
+
+
+
+🔹 How Does the Sidecar Proxy Work with Istio Resources?
+Istio's resources like VirtualServices and DestinationRules tell the sidecar how to route traffic. For example:
+
+VirtualService defines traffic routing rules based on HTTP paths, hostnames, etc.
+DestinationRule defines how traffic should be routed to the destination service (e.g., weighted routing, retries, circuit breaking).
+The sidecar proxy (Envoy) takes these rules and enforces them on the traffic that flows through it.
+
+
+
+
+
+🔹 Summary:
+The sidecar container is a proxy (Envoy) that manages network traffic for the application container.
+The sidecar intercepts all incoming and outgoing traffic to the application container and applies Istio’s traffic management, security, and observability rules.
+The sidecar proxy enables Istio features like mTLS, traffic routing, resiliency patterns, logging, and monitoring.
+💡 Why Is This Important?
+The sidecar pattern is a powerful approach because it allows Istio to provide advanced networking, security, and monitoring features without modifying the application code. The sidecar is the key component in making service mesh architectures like Istio work effectively in microservices environments.
+
+Let me know if you need more details on how sidecars interact or if you have any other questions
+
+
+
+
+
+
+
+
+ In Istio, each pod that is part of the service mesh will typically have a sidecar proxy container (Envoy) alongside the application container(s). This is because Istio operates at the pod level, and the sidecar proxy manages all traffic entering or leaving the pod.
+
+🔹 Sidecar in Every Container of the Pod
+If a pod has multiple application containers, then each container in the pod will have a sidecar proxy injected.
+However, only one sidecar per pod is typically needed to manage all traffic for that pod, regardless of the number of containers in the pod.
+🔹 Sidecar Proxy for Multiple Containers in a Pod
+Single Application Container:
+If a pod only has one application container (e.g., service-a), the sidecar proxy (Envoy) will be injected alongside that single container.
+
+Example:
+Pod: service-a
+Containers:
+
+service-a (application)
+istio-proxy (sidecar proxy)
+Multiple Application Containers:
+If a pod has multiple containers, the sidecar proxy is still injected once per pod, but it manages all the traffic for all containers inside the pod.
+
+Example:
+Pod: service-b
+Containers:
+
+service-b (application)
+service-b-helper (other container)
+istio-proxy (sidecar proxy)
+The single sidecar proxy manages all the traffic for both the service-b container and the service-b-helper container.
+
+🔹 Key Points:
+One Sidecar per Pod: Regardless of how many application containers a pod has, the pod will have one sidecar proxy container that handles traffic for all containers in that pod.
+The Sidecar Manages Traffic: The sidecar is responsible for managing the networking (traffic routing, security, observability) for all containers in the pod.
+🔹 Example of Pod with Multiple Containers
+Consider a pod with two containers: one for the application (service-a) and another for a helper process (service-a-helper).

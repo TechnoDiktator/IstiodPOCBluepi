@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	
+	"log"
+
 	"net/http"
-	
+	"io"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -47,17 +48,38 @@ func main() {
 			c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to contact Service C"})
 			return
 		}
+
+		log.Println("Response from Service C:", resp.Status)
+
 		defer resp.Body.Close()
 
-		var products []map[string]interface{}
-		if err := json.NewDecoder(resp.Body).Decode(&products); err != nil {
+		// ✅ Read the body before decoding
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response body"})
+			return
+		}
+		// ✅ Print raw response before unmarshalling
+		bodyString := string(bodyBytes)
+		log.Println("🔹 Raw Response from Service C:", bodyString)
+
+		// ✅ Unmarshal into map[string]interface{}
+		var serviceCResp map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &serviceCResp); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode response FROM Service C"})
 			return
 		}
 
-		// Add metadata
+		// ✅ Extract "data" field
+		products, ok := serviceCResp["data"].([]interface{})
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid response format from Service C"})
+			return
+		}
+
+		// ✅ Return only the "data" field from Service C
 		c.JSON(http.StatusOK, gin.H{
-			"data":       products,
+			"data":        products,  // ✅ Extracted array
 			"requested_at": time.Now(),
 			"service":     "service-a",
 		})
@@ -93,6 +115,9 @@ func main() {
 			return
 		}
 		defer resp.Body.Close()
+
+
+
 
 		var createdProduct models.ProductWithMetadata
 		if err := json.NewDecoder(resp.Body).Decode(&createdProduct); err != nil {

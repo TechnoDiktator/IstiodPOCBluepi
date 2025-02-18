@@ -1,0 +1,64 @@
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: service-a-to-service-c
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: service-c  # Apply this policy to Service C
+  action: ALLOW
+  rules:
+  - from:
+      - source:
+          principals: ["cluster.local/ns/default/sa/service-a"]  # Only allow requests from Service A
+    to:
+      - operation:
+          methods: ["GET", "POST"]
+          paths: ["/products"]
+    when: #https://dev-s8pk7mul3yw2xy77.us.auth0.com/
+      - key: request.auth.claims[iss]  # Check the `iss` claim in the JWT
+        values: ["https://dev-s8pk7mul3yw2xy77.us.auth0.com/"]  # Match the JWT issuer
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: service-c-to-service-b
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: service-b  # Apply this policy to Service B
+  action: ALLOW
+  rules:
+  - from:
+      - source:
+          principals: ["cluster.local/ns/default/sa/service-c"]  # Only allow requests from Service C
+    to:
+      - operation:
+          methods: ["GET", "POST"]
+          paths: ["/products"]
+    when:
+      - key: request.auth.claims[iss]  # Check the `iss` claim in the JWT
+        values: ["https://dev-s8pk7mul3yw2xy77.us.auth0.com/"]  # Match the JWT issuer
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-service-a-to-service-b
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: service-b  # Apply this policy to Service B
+  action: DENY
+  rules:
+    - from:
+        - source:
+            principals: ["cluster.local/ns/default/sa/service-a"]  # Deny Service A from accessing Service B
+      when:
+        - key: request.auth.claims[iss]  # Check the `iss` claim in the JWT
+          values: ["https://dev-s8pk7mul3yw2xy77.us.auth0.com/"]  # Deny if the issuer matches this value

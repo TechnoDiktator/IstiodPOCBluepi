@@ -11,6 +11,8 @@ spec:
   - from:
     - source:
         requestPrincipals: ["*"]  # ✅ Only allow requests with a valid JWT
+    - source:
+        namespaces: ["default"]  
     to:
     - operation:
         methods: ["GET", "POST"]
@@ -29,6 +31,8 @@ spec:
   - from:
     - source:
         requestPrincipals: ["*"]
+    - source:
+        namespaces: ["default"] 
     to:
     - operation:
         methods: ["GET", "POST"]

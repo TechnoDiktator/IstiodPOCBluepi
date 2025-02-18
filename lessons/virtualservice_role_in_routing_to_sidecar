@@ -1,0 +1,23 @@
+VirtualService and Sidecars:
+Sidecar Injection:
+When a VirtualService is configured in Istio, it automatically operates on the sidecars (Envoy proxies) because the sidecar proxies are responsible for routing the traffic between services. The sidecars are responsible for intercepting traffic and applying VirtualService routing rules.
+
+Traffic Routing via Envoy Sidecar:
+
+VirtualService rules define how traffic should be routed between services, including routing based on hostnames, HTTP paths, and more.
+These routing rules are applied by Istio’s sidecar proxy (Envoy), which handles the actual network traffic for the pods.
+When a request enters the cluster or when services communicate internally, Envoy (the sidecar proxy) consults the VirtualService configuration to determine how to route the request.
+Istio Sidecar Proxy Handles Routing:
+The sidecar proxies (Envoy) are the ones that actually enforce the routing decisions defined in the VirtualService. For example:
+
+If the VirtualService defines routing rules based on paths (e.g., /v1/products goes to version 1 of the service), the Envoy sidecar intercepts the incoming request and routes it to the appropriate backend service or version.
+If there are canary deployments or traffic splits, the Envoy sidecar ensures that traffic is distributed according to the configuration in the VirtualService.
+🔹 How Does the VirtualService Know About the Sidecars?
+The VirtualService doesn't need to be explicitly aware of the sidecars (Envoy proxies). Instead, it interacts with the services at the mesh level:
+
+When you define a VirtualService, you define the traffic routing rules (e.g., service, path, host), which apply to the service at the mesh level.
+The sidecar proxies are responsible for implementing those routing rules in practice, intercepting traffic and forwarding it to the correct destination.
+In short:
+
+The VirtualService defines traffic routing rules.
+The Istio sidecar (Envoy) applies those rules to intercept traffic and manage its flow between services.
