@@ -1,0 +1,75 @@
+Yes, Istio is automatically injecting a sidecar (istio-proxy) into the Datadog agent pod, and that is causing the startup probe failure.
+
+Since Datadog does not need Istio’s sidecar, it is best to disable automatic sidecar injection for Datadog pods.
+
+✅ Why Is This Happening?
+Your namespace (default) has Istio auto-injection enabled (istio-injection=enabled).
+This means Istio injects the sidecar into all pods in the namespace, including the Datadog agent pod.
+But Datadog doesn’t need an Istio proxy, and this is causing failures in the istio-proxy container.
+✅ How to Disable Istio Sidecar for Datadog Pods
+You have two options:
+
+🔹 Option 1: Disable Istio Injection for Datadog Only
+You can disable Istio sidecar injection for Datadog pods without affecting other services.
+
+1️⃣ Patch the Datadog agent DaemonSet to exclude Istio injection:
+
+bash
+Copy
+Edit
+kubectl annotate daemonset datadog-agent -n default sidecar.istio.io/inject="false"
+2️⃣ Restart Datadog agent to apply changes:
+
+bash
+Copy
+Edit
+kubectl rollout restart daemonset datadog-agent -n default
+🔹 Option 2: Disable Istio Injection for the Entire default Namespace
+If only Datadog is running in default, you can disable Istio sidecar injection for all pods in default:
+
+bash
+Copy
+Edit
+kubectl label namespace default istio-injection=disabled --overwrite
+Then restart Datadog:
+
+bash
+Copy
+Edit
+kubectl rollout restart daemonset datadog-agent -n default
+✅ Verify That Datadog is Running Without Istio Sidecar
+After disabling injection, check if Datadog is running without an Istio proxy:
+
+bash
+Copy
+Edit
+kubectl get pods -A --selector=sidecar.istio.io/injected=true
+If Datadog is still listed, the sidecar is still being injected.
+
+To check Datadog pods:
+
+bash
+Copy
+Edit
+kubectl get pods -n default | grep datadog
+kubectl describe pod <datadog-agent-pod-name> -n default
+Confirm that istio-proxy is not running inside the Datadog pod.
+
+💡 Summary
+Istio is automatically injecting a sidecar into Datadog, causing failures.
+Solution: Disable Istio injection for Datadog pods using:
+bash
+Copy
+Edit
+kubectl annotate daemonset datadog-agent -n default sidecar.istio.io/inject="false"
+Restart Datadog agent to apply changes:
+bash
+Copy
+Edit
+kubectl rollout restart daemonset datadog-agent -n default
+Verify that Datadog is running without the Istio sidecar:
+bash
+Copy
+Edit
+kubectl get pods -A --selector=sidecar.istio.io/injected=true
+🚀 Try this and let me know if you need more help! 😊

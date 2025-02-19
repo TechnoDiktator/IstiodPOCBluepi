@@ -1,0 +1,10 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: allow-plaintext-datadog
+  namespace: default
+spec:
+  host: "*.default.svc.cluster.local"  # ✅ Applies to all services in the namespace
+  trafficPolicy:
+    tls:
+      mode: PERMISSIVE  # ✅ Allows both mTLS and plaintext

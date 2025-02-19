@@ -1,0 +1,2 @@
+kubectl annotate daemonset datadog-agent -n default sidecar.istio.io/inject="false" --overwrite
+kubectl rollout restart daemonset datadog-agent -n default

@@ -1,0 +1,22 @@
+so if we did not turn off istio sidecar from datadog  ... would the logs be automatically collected  ..... 
+
+or is it a requirement to deliberately turn sidecar off from istio to enamble datadog log collection from the reamining services in cluster
+ChatGPT said:
+✅ Would Logs Be Automatically Collected If We Kept the Istio Sidecar in Datadog?
+Yes, if Istio sidecar (istio-proxy) was still injected into the Datadog agent pod, the logs could be collected automatically, but there are some issues that make disabling the sidecar a better approach.
+
+🔹 What Happens If Datadog Has an Istio Sidecar?
+If the Datadog pod has an Istio sidecar, all its traffic, including log collection, will go through Istio’s mTLS encryption. This can cause two problems:
+
+🚨 Problem 1: Datadog Cannot Reach Istio Logs Due to mTLS
+When Datadog tries to collect logs from other services (like istio-proxy, istiod, or service-a), the traffic goes through the Istio proxy.
+Istio encrypts this traffic using mTLS, which means the Datadog agent might not be able to properly read or forward the logs.
+🚨 Problem 2: Datadog Logs Themselves Get Captured By Istio
+Since Datadog runs inside the Istio service mesh, all logs and metrics that Datadog collects must pass through the Istio proxy.
+This means that Istio logs will also contain Datadog logs, leading to duplicate log entries or unnecessary overhead.
+✅ Why Disabling the Istio Sidecar for Datadog Helps
+By disabling the Istio sidecar in Datadog, we solve both problems:
+
+Datadog can collect logs directly from the Kubernetes log paths (/var/log/pods/...).
+Logs are collected without interference from Istio’s mTLS, preventing conflicts or failures.
+Datadog can collect logs from Istio components (istiod, istio-ingressgateway, istio-proxy) properly.

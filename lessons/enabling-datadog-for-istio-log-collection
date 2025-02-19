@@ -1,0 +1,9 @@
+💡 Summary
+✅ Step	✅ Command
+Enable Datadog log collection	helm upgrade datadog-agent datadog/datadog --set datadog.logs.enabled=true --set datadog.logs.containerCollectAll=true
+Create a ConfigMap to collect Istio logs	kubectl apply -f datadog-istio-logs.yaml
+Mount ConfigMap to Datadog agent	Edit kubectl edit daemonset datadog-agent -n default and add volumeMounts & volumes
+Restart Datadog agent	kubectl rollout restart daemonset datadog-agent -n default
+Verify logs in Datadog	kubectl logs -l app=datadog-agent -n default --tail=50
+
+

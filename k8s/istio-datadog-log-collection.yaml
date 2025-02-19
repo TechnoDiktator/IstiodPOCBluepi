@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: datadog-istio-logs
+  namespace: default
+  labels:
+    app: datadog-agent
+data:
+  istio.yaml: |-
+    logs:
+      - type: file
+        path: "/var/log/pods/istio-system_*/istio-proxy/*.log"
+        service: "istio-proxy"
+        source: "istio"
+      - type: file
+        path: "/var/log/pods/istio-system_*/istiod/*.log"
+        service: "istiod"
+        source: "istio"
+      - type: file
+        path: "/var/log/pods/istio-system_*/istio-ingressgateway/*.log"
+        service: "istio-ingressgateway"
+        source: "istio"
+      - type: file
+        path: "/var/log/pods/istio-system_*/istio-egressgateway/*.log"
+        service: "istio-egressgateway"
+        source: "istio"

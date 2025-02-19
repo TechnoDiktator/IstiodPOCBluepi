@@ -1,0 +1,7 @@
+DD_API_KEY=bb0d5e5c60f431710de445f3fb823f42 DD_SITE="us5.datadoghq.com" bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
+
+
+
+tarang@DESKTOP-HFI6U11:/opt/datadog-agent/bin/agent$ sudo grep api_key /etc/datadog-agent/datadog.yaml
+## @param api_key - string - required
+api_key: bb0d5e5c60f431710de445f3fb823f42
