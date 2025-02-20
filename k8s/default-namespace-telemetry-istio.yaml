@@ -1,0 +1,18 @@
+apiVersion: telemetry.istio.io/v1  # ✅ Use v1 instead of v1beta1
+kind: Telemetry
+metadata:
+  name: default-namespace-telemetry
+  namespace: default
+spec:
+  tracing:
+    - providers:
+        - name: envoy
+      randomSamplingPercentage: 50.00  # ✅ Captures 50% of traces
+  accessLogging:
+    - providers:
+        - name: envoy  # ✅ Logs requests for all pods in the default namespace
+  metrics:
+    - overrides:
+        - match:
+            mode: CLIENT_AND_SERVER
+          disabled: false

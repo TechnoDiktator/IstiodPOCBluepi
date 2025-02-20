@@ -1,3 +1,4 @@
+#Token Generation for testing
 curl --request POST   --url https://dev-s8pk7mul3yw2xy77.us.auth0.com/oauth/token   --header 'content-type: application/json'   --data '{
     "client_id": "sAJoKYuqhtSrOITyibPewyZ3crOa3sOt",
     "client_secret": "T3hDMWX5iDr2QuFK54gZzfeXWqbgw1iuaHWTNJpXN88jEoXjAbsQ35bZolriW3h_",
@@ -6,8 +7,19 @@ curl --request POST   --url https://dev-s8pk7mul3yw2xy77.us.auth0.com/oauth/toke
   }'   
 
 
-  minikube service istio-ingressgateway -n istio-system --url
+
+# Exposing istio ingress out of WSL
+minikube service istio-ingressgateway -n istio-system --url
 
 
 
-  
+
+# Port forwarding istio telemetry metrics api
+kubectl -n istio-system port-forward svc/istiod 15014:15014 &
+# proxy logs will be avilable on this endpoint 
+http://localhost:15014/metrics
+
+
+
+#datadog helm chart update 
+helm upgrade datadog   datadog/datadog   --namespace datadog   --values ./dd-values.yaml

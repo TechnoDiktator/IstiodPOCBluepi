@@ -7,4 +7,4 @@ spec:
   host: "*.default.svc.cluster.local"  # ✅ Applies to all services in the namespace
   trafficPolicy:
     tls:
-      mode: PERMISSIVE  # ✅ Allows both mTLS and plaintext
+      mode: DISABLE  # ✅ Corrected (Allows plaintext traffic)
