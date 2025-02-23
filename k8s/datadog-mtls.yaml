@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: datadog-mtls
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: datadog-agent  # Only affects Datadog
+  mtls:
+    mode: PERMISSIVE  # Allows both mTLS and plaintext traffic

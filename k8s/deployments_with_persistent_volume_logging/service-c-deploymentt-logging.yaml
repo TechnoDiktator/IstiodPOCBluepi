@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-c
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: service-c
+  template:
+    metadata:
+      labels:
+        app: service-c
+
+    annotations:
+      sidecar.istio.io/logLevel: "debug"
+      sidecar.istio.io/componentLogLevel: "misc:debug"
+    spec:
+      volumes:
+      - name: service-c-storage
+        persistentVolumeClaim:
+          claimName: service-c-pvc
+      - name: istio-storage
+        persistentVolumeClaim:
+          claimName: istio-c-pvc
+
+      containers:
+      - name: service-c
+        image: tarang412/service-c:latest
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: service-c-storage
+            mountPath: /var/log/service-c  # ✅ Inside Pod
+        command: ["/bin/sh", "-c"]
+        args:
+          - touch /var/log/service-c/service-c.log && /app/service-c | tee -a /var/log/service-c/service-c.log
+        ports:
+          - containerPort: 8083
+        env:
+        - name: SERVICE_B_URL
+          valueFrom:
+            secretKeyRef:
+              name: service-config-secret
+              key: SERVICE_B_URL
+        - name: AUTH0_DOMAIN
+          valueFrom:
+            secretKeyRef:
+              name: auth0-secret
+              key: AUTH0_DOMAIN
+              
+      - name: istio-proxy  # ✅ Istio Proxy logging setup
+        volumeMounts:
+        - name: istio-storage
+          mountPath: /var/log/istio  # ✅ Separate Istio logs inside pod
+        command: ["/bin/sh", "-c"]
+        args:
+          - >
+            mkdir -p /var/log/istio &&
+            touch /var/log/istio/proxy.log &&
+            /usr/local/bin/pilot-agent proxy >> /var/log/istio/proxy.log 2>&1  
+      
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-c
+spec:
+  type: ClusterIP
+  selector:
+    app: service-c
+  ports:
+    - port: 8083
+      targetPort: 8083

@@ -23,3 +23,17 @@ http://localhost:15014/metrics
 
 #datadog helm chart update 
 helm upgrade datadog   datadog/datadog   --namespace datadog   --values ./dd-values.yaml
+
+
+
+# Delete istio pods 
+kubectl delete pod -l app=istiod -n istio-system
+kubectl rollout restart deployment istiod -n istio-system
+
+
+
+#restart service pods
+tarang@DESKTOP-HFI6U11:~$ kubectl rollout restart deployment service-a
+kubectl rollout restart deployment service-b
+kubectl rollout restart deployment service-c
+

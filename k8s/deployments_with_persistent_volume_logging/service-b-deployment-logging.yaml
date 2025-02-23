@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-b
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: service-b
+  template:
+    metadata:
+      labels:
+        app: service-b
+      annotations:
+        sidecar.istio.io/logLevel: "debug"
+        sidecar.istio.io/componentLogLevel: "misc:debug"
+    spec:
+      volumes:
+      - name: service-b-storage
+        persistentVolumeClaim:
+          claimName: service-b-pvc  # ✅ Separate PVC for Service B logs
+      - name: istio-storage
+        persistentVolumeClaim:
+          claimName: istio-b-pvc  # ✅ Separate PVC for Istio logs
+      containers:
+      - name: service-b
+        image: tarang412/service-b:latest
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: service-b-storage
+            mountPath: /var/log/service-b  # ✅ Inside Pod
+        command: ["/bin/sh", "-c"]
+        args:
+          - touch /var/log/service-b/service-b.log && /app/service-b | tee -a /var/log/service-b/service-b.log
+        ports:
+          - containerPort: 8081
+        env:
+        - name: DB_HOST
+          value: "mysql.default.svc.cluster.local"
+        - name: DB_USER
+          value: "root"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_DATABASE
+
+      - name: istio-proxy 
+        volumeMounts:
+        - name: istio-storage
+          mountPath: /var/log/istio  
+        command: ["/bin/sh", "-c"]
+        args:
+          - >
+            mkdir -p /var/log/istio &&
+            touch /var/log/istio/proxy.log &&
+            /usr/local/bin/pilot-agent proxy >> /var/log/istio/proxy.log 2>&1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-b
+spec:
+  type: ClusterIP
+  selector:
+    app: service-b
+  ports:
+    - port: 8081
+      targetPort: 8081

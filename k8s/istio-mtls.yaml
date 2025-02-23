@@ -6,4 +6,18 @@ metadata:
 spec:
   mtls:
     mode: STRICT
+
+
+# apiVersion: security.istio.io/v1
+# kind: PeerAuthentication
+# metadata:
+#   name: datadog-mtls
+#   namespace: default
+# spec:
+#   selector:
+#     matchLabels:
+#       app: datadog-agent
+#   mtls:
+#     mode: PERMISSIVE
+
   

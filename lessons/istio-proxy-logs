@@ -1,0 +1,7 @@
+✅ Shared Persistent Volume (logs-pv) stores logs from both containers.
+✅ Service A logs to /var/log/service-a/service-a.log.
+✅ Istio Proxy logs to /var/log/istio/proxy.log.
+✅ Ensures log files exist (mkdir -p && touch).
+✅ Keeps logs across pod restarts.
+
+

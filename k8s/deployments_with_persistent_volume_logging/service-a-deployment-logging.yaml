@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-a
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: service-a
+  template:
+    metadata:
+      labels:
+        app: service-a
+      annotations:
+        sidecar.istio.io/logLevel: "debug"
+        sidecar.istio.io/componentLogLevel: "misc:debug"
+
+    spec:
+      volumes:
+      - name: service-a-storage
+        persistentVolumeClaim:
+          claimName: service-a-pvc  # ✅ Separate PVC for Service-A logs
+      - name: istio-storage
+        persistentVolumeClaim:
+          claimName: istio-pvc  # ✅ Separate PVC for Istio logs
+      containers:
+      - name: service-a
+        image: tarang412/service-a:latest
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: service-a-storage
+          mountPath: /var/log/service-a  # ✅ Inside Service-A Pod
+        command: ["/bin/sh", "-c"]
+        args:
+          - >
+            touch /var/log/service-a/service-a.log &&
+            /app/service-a | tee -a /var/log/service-a/service-a.log
+        ports:
+        - containerPort: 8082
+        env:
+        - name: AUTH0_DOMAIN
+          valueFrom:
+            secretKeyRef:
+              name: auth0-secret
+              key: AUTH0_DOMAIN
+        - name: AUTH0_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: auth0-secret
+              key: AUTH0_CLIENT_ID
+        - name: AUTH0_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: auth0-secret
+              key: AUTH0_CLIENT_SECRET
+        - name: AUTH0_CALLBACK_URL
+          valueFrom:
+            secretKeyRef:
+              name: auth0-secret
+              key: AUTH0_CALLBACK_URL
+      - name: istio-proxy  # ✅ Modify Istio Proxy container
+        volumeMounts:
+        - name: istio-storage
+          mountPath: /var/log/istio  # ✅ Istio logs inside pod
+        command: ["/bin/sh", "-c"]
+        args:
+          - >
+            mkdir -p /var/log/istio &&
+            touch /var/log/istio/proxy.log &&
+            /usr/local/bin/pilot-agent proxy >> /var/log/istio/proxy.log 2>&1  
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-a
+spec:
+  type: ClusterIP
+  selector:
+    app: service-a
+  ports:
+    - port: 8082
+      targetPort: 8082

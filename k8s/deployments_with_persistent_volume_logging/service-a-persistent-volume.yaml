@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: logs-pv-service-a
+spec:
+  capacity:
+    storage: 1Gi  # ✅ 1GB for Service A logs
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/data/logs/service-a"
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: logs-pv-istio
+spec:
+  capacity:
+    storage: 1Gi  # ✅ 1GB for Istio logs
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/data/logs/istio"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: service-a-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi  # ✅ Matches PV size
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: istio-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi  # ✅ Matches PV size
+
+
