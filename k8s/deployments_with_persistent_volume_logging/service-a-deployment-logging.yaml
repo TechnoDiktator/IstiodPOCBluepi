@@ -14,7 +14,10 @@ spec:
       annotations:
         sidecar.istio.io/logLevel: "debug"
         sidecar.istio.io/componentLogLevel: "misc:debug"
-
+        proxy.istio.io/config: |
+          proxyMetadata:
+          accessLogFile: /var/log/istio/access.log  # Redirect access logs to a file
+          accessLogEncoding: JSON  # Log format (JSON or TEXT)
     spec:
       volumes:
       - name: service-a-storage
@@ -22,7 +25,7 @@ spec:
           claimName: service-a-pvc  # ✅ Separate PVC for Service-A logs
       - name: istio-storage
         persistentVolumeClaim:
-          claimName: istio-pvc  # ✅ Separate PVC for Istio logs
+          claimName: istio-a-pvc  # ✅ Separate PVC for Istio logs
       containers:
       - name: service-a
         image: tarang412/service-a:latest
@@ -30,9 +33,12 @@ spec:
         volumeMounts:
         - name: service-a-storage
           mountPath: /var/log/service-a  # ✅ Inside Service-A Pod
+        - name: istio-storage
+          mountPath: /var/log/istio  # Mount PVC for Istio logs (shared with Istio sidecar)
         command: ["/bin/sh", "-c"]
         args:
           - >
+            mkdir -p /var/log/service-a &&
             touch /var/log/service-a/service-a.log &&
             /app/service-a | tee -a /var/log/service-a/service-a.log
         ports:
@@ -58,16 +64,6 @@ spec:
             secretKeyRef:
               name: auth0-secret
               key: AUTH0_CALLBACK_URL
-      - name: istio-proxy  # ✅ Modify Istio Proxy container
-        volumeMounts:
-        - name: istio-storage
-          mountPath: /var/log/istio  # ✅ Istio logs inside pod
-        command: ["/bin/sh", "-c"]
-        args:
-          - >
-            mkdir -p /var/log/istio &&
-            touch /var/log/istio/proxy.log &&
-            /usr/local/bin/pilot-agent proxy >> /var/log/istio/proxy.log 2>&1  
 
 ---
 apiVersion: v1

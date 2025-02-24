@@ -11,54 +11,48 @@ spec:
     metadata:
       labels:
         app: service-c
-
-    annotations:
-      sidecar.istio.io/logLevel: "debug"
-      sidecar.istio.io/componentLogLevel: "misc:debug"
+      annotations:
+        sidecar.istio.io/logLevel: "debug"  # Set Istio sidecar log level
+        sidecar.istio.io/componentLogLevel: "misc:debug"  # Set component log level
+        proxy.istio.io/config: |
+          proxyMetadata:
+          accessLogFile: /var/log/istio/access.log  # Redirect access logs to a file
+          accessLogEncoding: JSON  # Log format (JSON or TEXT)
     spec:
       volumes:
-      - name: service-c-storage
-        persistentVolumeClaim:
-          claimName: service-c-pvc
-      - name: istio-storage
-        persistentVolumeClaim:
-          claimName: istio-c-pvc
-
-      containers:
-      - name: service-c
-        image: tarang412/service-c:latest
-        imagePullPolicy: Always
-        volumeMounts:
-          - name: service-c-storage
-            mountPath: /var/log/service-c  # ✅ Inside Pod
-        command: ["/bin/sh", "-c"]
-        args:
-          - touch /var/log/service-c/service-c.log && /app/service-c | tee -a /var/log/service-c/service-c.log
-        ports:
-          - containerPort: 8083
-        env:
-        - name: SERVICE_B_URL
-          valueFrom:
-            secretKeyRef:
-              name: service-config-secret
-              key: SERVICE_B_URL
-        - name: AUTH0_DOMAIN
-          valueFrom:
-            secretKeyRef:
-              name: auth0-secret
-              key: AUTH0_DOMAIN
-              
-      - name: istio-proxy  # ✅ Istio Proxy logging setup
-        volumeMounts:
+        - name: service-c-storage
+          persistentVolumeClaim:
+            claimName: service-c-pvc  # PVC for Service-C logs
         - name: istio-storage
-          mountPath: /var/log/istio  # ✅ Separate Istio logs inside pod
-        command: ["/bin/sh", "-c"]
-        args:
-          - >
-            mkdir -p /var/log/istio &&
-            touch /var/log/istio/proxy.log &&
-            /usr/local/bin/pilot-agent proxy >> /var/log/istio/proxy.log 2>&1  
-      
+          persistentVolumeClaim:
+            claimName: istio-c-pvc  # PVC for Istio logs
+      containers:
+        - name: service-c
+          image: tarang412/service-c:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: service-c-storage
+              mountPath: /var/log/service-c  # Mount PVC for Service-C logs
+            - name: istio-storage
+              mountPath: /var/log/istio  # Mount PVC for Istio logs (shared with Istio sidecar)
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              touch /var/log/service-c/service-c.log &&
+              /app/service-c | tee -a /var/log/service-c/service-c.log
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SERVICE_B_URL
+              valueFrom:
+                secretKeyRef:
+                  name: service-config-secret
+                  key: SERVICE_B_URL
+            - name: AUTH0_DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  name: auth0-secret
+                  key: AUTH0_DOMAIN
 
 ---
 apiVersion: v1

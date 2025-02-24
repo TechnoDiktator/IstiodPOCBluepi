@@ -12,54 +12,52 @@ spec:
       labels:
         app: service-b
       annotations:
-        sidecar.istio.io/logLevel: "debug"
-        sidecar.istio.io/componentLogLevel: "misc:debug"
+        sidecar.istio.io/logLevel: "debug"  # Set Istio sidecar log level
+        sidecar.istio.io/componentLogLevel: "misc:debug"  # Set component log level
+        proxy.istio.io/config: |
+          proxyMetadata:
+          accessLogFile: /var/log/istio/access.log  # Redirect access logs to a file
+          accessLogEncoding: JSON  # Log format (JSON or TEXT)
+    
     spec:
       volumes:
-      - name: service-b-storage
-        persistentVolumeClaim:
-          claimName: service-b-pvc  # ✅ Separate PVC for Service B logs
-      - name: istio-storage
-        persistentVolumeClaim:
-          claimName: istio-b-pvc  # ✅ Separate PVC for Istio logs
-      containers:
-      - name: service-b
-        image: tarang412/service-b:latest
-        imagePullPolicy: Always
-        volumeMounts:
-          - name: service-b-storage
-            mountPath: /var/log/service-b  # ✅ Inside Pod
-        command: ["/bin/sh", "-c"]
-        args:
-          - touch /var/log/service-b/service-b.log && /app/service-b | tee -a /var/log/service-b/service-b.log
-        ports:
-          - containerPort: 8081
-        env:
-        - name: DB_HOST
-          value: "mysql.default.svc.cluster.local"
-        - name: DB_USER
-          value: "root"
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: MYSQL_ROOT_PASSWORD
-        - name: DB_NAME
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: MYSQL_DATABASE
-
-      - name: istio-proxy 
-        volumeMounts:
+        - name: service-b-storage
+          persistentVolumeClaim:
+            claimName: service-b-pvc  # PVC for Service-B logs
         - name: istio-storage
-          mountPath: /var/log/istio  
-        command: ["/bin/sh", "-c"]
-        args:
-          - >
-            mkdir -p /var/log/istio &&
-            touch /var/log/istio/proxy.log &&
-            /usr/local/bin/pilot-agent proxy >> /var/log/istio/proxy.log 2>&1
+          persistentVolumeClaim:
+            claimName: istio-b-pvc  # PVC for Istio logs
+      containers:
+        - name: service-b
+          image: tarang412/service-b:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: service-b-storage
+              mountPath: /var/log/service-b  # Mount PVC for Service-B logs
+            - name: istio-storage
+              mountPath: /var/log/istio  # Mount PVC for Istio logs (shared with Istio sidecar)
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              touch /var/log/service-b/service-b.log &&
+              /app/service-b | tee -a /var/log/service-b/service-b.log
+          ports:
+            - containerPort: 8081
+          env:
+            - name: DB_HOST
+              value: "mysql.default.svc.cluster.local"
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_DATABASE
 
 ---
 apiVersion: v1
