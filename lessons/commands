@@ -37,3 +37,7 @@ tarang@DESKTOP-HFI6U11:~$ kubectl rollout restart deployment service-a
 kubectl rollout restart deployment service-b
 kubectl rollout restart deployment service-c
 
+
+
+#correct upgrade command
+helm upgrade datadog-agent datadog/datadog --namespace default --values ./dd-values.yaml
