@@ -1,7 +1,7 @@
 # IstiodPOCBluepi
 I demo service to learn more about istiod
 # Microservices Project with Istio and Datadog Monitoring
-
+## https://app.diagrams.net/#G1e8vDn2fPGrLEDZYzFHExLPR-PIuoWTvC#%7B%22pageId%22%3A%225CSxC_CJXj1vpsv0aLtl%22%7D
 ## Overview
 This project consists of three Golang-based microservices deployed in a Kubernetes cluster with Istio for service-to-service security and observability. The setup includes JWT authentication via Auth0 and centralized logging using Persistent Volumes and Datadog.
 
