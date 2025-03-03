@@ -1,0 +1,27 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istio-control-plane
+  namespace: istio-system
+spec:
+  profile: default  # Uses the default Istio installation profile
+  meshConfig:
+    accessLogFile: "/var/log/istio/access.log"  # Enables Istio sidecar logs
+  components:
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+    pilot:
+      enabled: true
+  values:
+    global:
+      proxy:
+        logLevel: info  # Set log level for Istio proxies
+    proxy:
+      volumeMounts:
+        - mountPath: /var/log/istio
+          name: sidecar-logs
+      volumes:
+        - name: sidecar-logs
+          persistentVolumeClaim:
+            claimName: istio-sidecar-logs-pvc

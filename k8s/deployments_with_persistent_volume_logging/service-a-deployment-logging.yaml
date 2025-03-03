@@ -16,54 +16,53 @@ spec:
         sidecar.istio.io/componentLogLevel: "misc:debug"
         proxy.istio.io/config: |
           proxyMetadata:
-          accessLogFile: /var/log/istio/access.log  # Redirect access logs to a file
-          accessLogEncoding: JSON  # Log format (JSON or TEXT)
+            ISTIO_META_JSON_TRACE: "true"
+            ISTIO_META_ACCESS_LOG_FILE: "/var/log/istio/access.log"
+            ISTIO_META_ACCESS_LOG_ENCODING: "JSON"
+        sidecar.istio.io/userVolumeMount: '[{"name": "istio-logs", "mountPath": "/var/log/istio"}]'  # ✅ Attach PVC to sidecar
     spec:
       volumes:
-      - name: service-a-storage
-        persistentVolumeClaim:
-          claimName: service-a-pvc  # ✅ Separate PVC for Service-A logs
-      - name: istio-storage
-        persistentVolumeClaim:
-          claimName: istio-a-pvc  # ✅ Separate PVC for Istio logs
-      containers:
-      - name: service-a
-        image: tarang412/service-a:latest
-        imagePullPolicy: Always
-        volumeMounts:
         - name: service-a-storage
-          mountPath: /var/log/service-a  # ✅ Inside Service-A Pod
-        - name: istio-storage
-          mountPath: /var/log/istio  # Mount PVC for Istio logs (shared with Istio sidecar)
-        command: ["/bin/sh", "-c"]
-        args:
-          - >
-            mkdir -p /var/log/service-a &&
-            touch /var/log/service-a/service-a.log &&
-            /app/service-a | tee -a /var/log/service-a/service-a.log
-        ports:
-        - containerPort: 8082
-        env:
-        - name: AUTH0_DOMAIN
-          valueFrom:
-            secretKeyRef:
-              name: auth0-secret
-              key: AUTH0_DOMAIN
-        - name: AUTH0_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: auth0-secret
-              key: AUTH0_CLIENT_ID
-        - name: AUTH0_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: auth0-secret
-              key: AUTH0_CLIENT_SECRET
-        - name: AUTH0_CALLBACK_URL
-          valueFrom:
-            secretKeyRef:
-              name: auth0-secret
-              key: AUTH0_CALLBACK_URL
+          persistentVolumeClaim:
+            claimName: service-a-pvc  # ✅ For application logs
+        - name: istio-logs  # ✅ For Istio logs
+          persistentVolumeClaim:
+            claimName: istio-a-pvc
+      containers:
+        - name: service-a
+          image: tarang412/service-a:latest
+          imagePullPolicy: Always
+          volumeMounts:
+          - name: service-a-storage
+            mountPath: /var/log/service-a  # ✅ Application logs
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              touch /var/log/service-a/service-a.log &&
+              /app/service-a | tee -a /var/log/service-a/service-a.log
+          ports:
+          - containerPort: 8082
+          env:
+          - name: AUTH0_DOMAIN
+            valueFrom:
+              secretKeyRef:
+                name: auth0-secret
+                key: AUTH0_DOMAIN
+          - name: AUTH0_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: auth0-secret
+                key: AUTH0_CLIENT_ID
+          - name: AUTH0_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: auth0-secret
+                key: AUTH0_CLIENT_SECRET
+          - name: AUTH0_CALLBACK_URL
+            valueFrom:
+              secretKeyRef:
+                name: auth0-secret
+                key: AUTH0_CALLBACK_URL
 
 ---
 apiVersion: v1

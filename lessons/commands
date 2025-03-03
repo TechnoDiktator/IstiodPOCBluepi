@@ -7,6 +7,14 @@ curl --request POST   --url https://dev-s8pk7mul3yw2xy77.us.auth0.com/oauth/toke
   }'   
 
 
+# get config map 
+kubectl get cm istio -n istio-system -o yaml
+
+
+# istio config map
+kubectl edit cm istio -n istio-system
+
+
 
 # Exposing istio ingress out of WSL
 minikube service istio-ingressgateway -n istio-system --url
@@ -32,12 +40,21 @@ kubectl rollout restart deployment istiod -n istio-system
 
 
 
-#restart service pods
+# restart service pods
 tarang@DESKTOP-HFI6U11:~$ kubectl rollout restart deployment service-a
 kubectl rollout restart deployment service-b
 kubectl rollout restart deployment service-c
 
 
 
-#correct upgrade command
-helm upgrade datadog-agent datadog/datadog --namespace default --values ./dd-values.yaml
+# correct upgrade command
+helm upgrade datadog-agent datadog/datadog --namespace default --values ./dd-values.
+
+
+
+# looking at container logs
+kubectl logs -f service-a-6f79658cbc-bgrww -c istio-proxy -n default
+
+
+
+

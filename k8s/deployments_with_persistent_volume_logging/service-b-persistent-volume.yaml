@@ -18,6 +18,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: service-b-pvc
 spec:
+  storageClassName: manual
   accessModes:
     - ReadWriteOnce
   resources:

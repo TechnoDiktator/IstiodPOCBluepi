@@ -1,0 +1,41 @@
+Yes! To properly expose Service A in an Istio-enabled Minikube cluster, you need the following:
+
+1️⃣ Deployment & Service YAML → To deploy Service A and make it available inside the cluster.
+2️⃣ Gateway YAML → To allow external traffic into the Istio service mesh.
+3️⃣ VirtualService YAML → To route the incoming requests from the Gateway to Service A.
+
+
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: service-a-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "service-a.local"
+
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: service-a-vs
+spec:
+  hosts:
+  - "service-a.local"
+  gateways:
+  - service-a-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: service-a
+        port:
+          number: 8082
